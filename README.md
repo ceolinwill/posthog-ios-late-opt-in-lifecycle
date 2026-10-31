@@ -42,3 +42,5 @@ A possible fix: seed `isAppBackgrounded` from `isInBackground` in `start()`, and
 - posthog-ios 3.93.1 (Swift Package Manager)
 - macOS 27.2, Xcode 27.2, Swift 6.4.2
 - Also seen on iOS 27.2 (iPhone 17 simulator) in an app that calls `optIn()` once the user's consent loads.
+
+Reported in https://github.com/PostHog/posthog-ios/issues/1002
