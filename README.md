@@ -31,9 +31,11 @@ Step 2 captures `Application Backgrounded`, and step 3 captures `Application Ope
 
 Step 2 captures nothing, and step 3 captures `from_background: false`.
 
-`optIn()` installs the integrations (`PostHogSDK.optIn()` → `installIntegrations()`), and `PostHogAppLifeCycleIntegration` starts with `isAppBackgrounded = true` and `isFreshAppLaunch = true` whatever the app's state is. The first `didEnterBackground` hits `guard !isAppBackgrounded` in `captureAppBackgrounded()` and is skipped, and the next `didBecomeActive` takes the fresh-launch branch in `captureAppOpened()`. `ApplicationLifecyclePublisher` doesn't replay past notifications, so the integration can't learn the state from them.
+`optIn()` installs the integrations (`PostHogSDK.optIn()` → `installIntegrations()`), and `PostHogAppLifeCycleIntegration` starts with `isAppBackgrounded = true` and `isFreshAppLaunch = true` whatever the app's state is. The first `didEnterBackground` hits `guard !isAppBackgrounded` in `captureAppBackgrounded()` and is skipped, and the next `didBecomeActive` takes the fresh-launch branch in `captureAppOpened()`.
 
-A possible fix: read the app's current state when the integration installs (`UIApplication.shared.applicationState` / `NSApp.isActive`, which the publisher already reads on the main thread for `isBackgrounded`), and count the launch as fresh only once per process.
+`AppLifecyclePublishing.isInBackground` exists for exactly this ("NotificationCenter doesn't replay past lifecycle events, so consumers that care about the value at subscription time should seed from this"), but the lifecycle integration doesn't seed from it.
+
+A possible fix: seed `isAppBackgrounded` from `isInBackground` in `start()`, and when the app is already in the foreground there, treat the next open as one from the background.
 
 ## Environment
 
